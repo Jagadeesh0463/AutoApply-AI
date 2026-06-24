@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  /* ATS-safe: single column, no tables, no graphics, no columns */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
+    color: #000000;
+    line-height: 1.4;
+  }
+
+  @page {
+    size: letter;
+    margin: 0.8in 0.75in;
+  }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 12px; }
+  .header h1 { font-size: 18pt; font-weight: bold; letter-spacing: 1px; }
+  .header .contact {
+    font-size: 10pt;
+    color: #333;
+    margin-top: 4px;
+  }
+  .header .contact span { margin: 0 6px; }
+
+  /* Section */
+  .section { margin-bottom: 12px; }
+  .section-title {
+    font-size: 11pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1.5px solid #000;
+    padding-bottom: 2px;
+    margin-bottom: 6px;
+  }
+
+  /* Entry (project / experience / education) */
+  .entry { margin-bottom: 10px; }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .entry-title { font-weight: bold; font-size: 11pt; }
+  .entry-sub { font-size: 10pt; color: #333; margin-top: 2px; margin-bottom: 2px; }
+  .entry-date { font-size: 10pt; color: #333; white-space: nowrap; }
+
+  /* Bullets — using div instead of ul/li to avoid WeasyPrint marker detachment */
+  .bullet { font-size: 10.5pt; margin-bottom: 4px; line-height: 1.5; padding-left: 14px; text-indent: -14px; }
+  .bullet::before { content: "• "; }
+
+  /* Skills inline */
+  .skills-text { font-size: 10.5pt; line-height: 1.6; }
+
+  /* Section heading never orphaned */
+  h2 { page-break-after: avoid; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>{{ candidate.name }}</h1>
+  <div class="contact">
+    <span>{{ candidate.email }}</span> |
+    <span>{{ candidate.phone }}</span> |
+    <span>{{ candidate.location }}</span>
+    {% if candidate.linkedin %} | <span>{{ candidate.linkedin }}</span>{% endif %}
+    {% if candidate.github %} | <span>{{ candidate.github }}</span>{% endif %}
+  </div>
+</div>
+
+<!-- PROFESSIONAL SUMMARY -->
+<div class="section">
+  <div class="section-title">Professional Summary</div>
+  <p style="font-size:10.5pt;">{{ resume.summary }}</p>
+</div>
+
+<!-- TECHNICAL SKILLS -->
+<div class="section">
+  <div class="section-title">Technical Skills</div>
+  <p class="skills-text">{{ resume.skills | join(' | ') }}</p>
+</div>
+
+<!-- CERTIFICATIONS -->
+{% if resume.certifications %}
+<div class="section">
+  <div class="section-title">Certifications</div>
+  <div style="margin-top:4px;">
+    {% for cert in resume.certifications %}
+    <div class="bullet">{{ cert }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- PROJECTS (shown before experience for students/early-career) -->
+{% if resume.projects %}
+<div class="section">
+  <div class="section-title">Projects & Portfolios</div>
+  {% for project in resume.projects %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="entry-title">{{ project.name }}</span>
+    </div>
+    {% if project.tech_stack %}
+    <div class="entry-sub">Tech Stack: {{ project.tech_stack }}</div>
+    {% endif %}
+    <div style="margin-top:4px;">
+      {% for bullet in project.bullets %}
+      <div class="bullet">{{ bullet }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- PROFESSIONAL EXPERIENCE -->
+{% if resume.experience %}
+<div class="section">
+  <div class="section-title">Professional Experience</div>
+  {% for exp in resume.experience %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="entry-title">{{ exp.company }}</span>
+      <span class="entry-date">{{ exp.duration }}</span>
+    </div>
+    <div class="entry-sub">{{ exp.title }}{% if exp.location %} — {{ exp.location }}{% endif %}</div>
+    <div style="margin-top:4px;">
+      {% for bullet in exp.bullets %}
+      <div class="bullet">{{ bullet }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- EDUCATION -->
+{% if resume.education %}
+<div class="section">
+  <div class="section-title">Education</div>
+  {% for edu in resume.education %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="entry-title">{{ edu.degree }}</span>
+      <span class="entry-date">{{ edu.duration }}</span>
+    </div>
+    <div class="entry-sub">{{ edu.institution }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+</body>
+</html>

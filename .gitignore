@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+
+# Environment variables — NEVER commit
+.env
+*.env
+
+# Database & vector store — local data, not for git
+backend/data/autoapply.db
+backend/data/chroma/
+
+# Gmail OAuth tokens — NEVER commit (contains private credentials)
+backend/credentials.json
+backend/token.json
+backend/.oauth_state.json
+
+# Generated resumes (created at runtime)
+backend/outputs/
+
+# Uploaded screenshots (temporary, deleted after processing)
+backend/uploads/
+
+# Test files (generated during Phase 8 testing)
+backend/test_screenshots/
+backend/test_results/
+
+# Root-level generated files
+*.pdf
+qa_job_screenshot.png
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

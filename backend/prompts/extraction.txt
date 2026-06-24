@@ -1,0 +1,18 @@
+Extract only what is explicitly stated in the job posting text or image provided.
+
+Return valid JSON matching this exact schema:
+{
+  "company_name": "string",
+  "job_title": "string",
+  "core_responsibilities": ["string"],
+  "required_skills": ["string"],
+  "preferred_certifications": ["string"],
+  "minimum_years_experience": integer or null
+}
+
+Rules:
+- Do not infer, add, or guess any field not visibly present in the source.
+- If a field is not present, use null for scalars or [] for arrays.
+- required_skills should list individual skills/technologies, not sentences.
+- preferred_certifications should list certification names only.
+- Return ONLY the JSON object, no other text, no markdown, no code fences.

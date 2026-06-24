@@ -1,0 +1,42 @@
+# Web framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Data validation
+pydantic
+
+# LLM
+groq
+langchain
+langchain-groq
+
+# OCR (local fallback)
+easyocr
+
+# Image preprocessing
+Pillow
+
+# Vector store + embeddings (all local, no API cost)
+chromadb
+sentence-transformers
+
+# Scoring
+scikit-learn
+numpy
+
+# Resume rendering
+WeasyPrint
+Jinja2
+
+# Resume / profile parsing
+PyMuPDF
+python-docx
+
+# Gmail API
+google-api-python-client
+google-auth-oauthlib
+google-auth-httplib2
+
+# Utilities
+python-dotenv
