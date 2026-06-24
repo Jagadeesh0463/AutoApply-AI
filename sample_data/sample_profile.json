@@ -1,0 +1,65 @@
+{
+  "description": "Sample profile structure — this is the format AutoApply AI stores after parsing a resume. Upload your own PDF/DOCX at /profile to generate your real profile.",
+  "items": [
+    {
+      "type": "skill",
+      "content": "Java — Core Java, OOPs, Collections, Exception Handling",
+      "tags": "java, programming, oop, collections"
+    },
+    {
+      "type": "skill",
+      "content": "Selenium WebDriver — Page Object Model, TestNG, Maven",
+      "tags": "selenium, webdriver, testing, automation"
+    },
+    {
+      "type": "skill",
+      "content": "REST Assured — API testing, JSON/XML validation, OAuth",
+      "tags": "rest, api, testing, rest-assured"
+    },
+    {
+      "type": "skill",
+      "content": "Cucumber BDD — Gherkin, Feature files, Step definitions",
+      "tags": "cucumber, bdd, gherkin, automation"
+    },
+    {
+      "type": "skill",
+      "content": "SQL — MySQL, PostgreSQL, query writing, database validation",
+      "tags": "sql, mysql, database, query"
+    },
+    {
+      "type": "skill",
+      "content": "Git — Version control, branching, pull requests, GitHub",
+      "tags": "git, github, version-control"
+    },
+    {
+      "type": "skill",
+      "content": "Jenkins — CI/CD pipelines, job configuration, build automation",
+      "tags": "jenkins, cicd, devops, automation"
+    },
+    {
+      "type": "project",
+      "content": "E-commerce Test Automation Framework — Built a comprehensive Page Object Model framework using Java, Selenium WebDriver, and TestNG. Automated 200+ regression test cases achieving 95% pass rate. Integrated with Jenkins CI/CD pipeline for continuous testing.",
+      "tags": "selenium, java, testng, automation, pom, jenkins"
+    },
+    {
+      "type": "project",
+      "content": "API Testing Suite — Designed REST Assured test framework for microservices API validation. Covered 150+ endpoints with positive and negative test scenarios. Integrated with Cucumber BDD for behaviour-driven test documentation.",
+      "tags": "rest-assured, api, cucumber, bdd, microservices"
+    },
+    {
+      "type": "experience",
+      "content": "QA Engineer at Tech Solutions Pvt Ltd (Jan 2023 – Present, Bengaluru). Developed and maintained Selenium automation scripts for web application testing. Reduced manual testing effort by 60% through automation. Collaborated with developers on defect triage and resolution. Executed regression, smoke, and sanity test suites across sprint cycles.",
+      "tags": "qa, testing, selenium, automation, regression"
+    },
+    {
+      "type": "cert",
+      "content": "ISTQB Foundation Level Certification — International Software Testing Qualifications Board, 2023",
+      "tags": "istqb, certification, testing, quality-assurance"
+    },
+    {
+      "type": "education",
+      "content": "B.Tech in Food Technology — Vignan's Foundation for Science Technology and Research, Guntur, Andhra Pradesh (2017 – 2021)",
+      "tags": "btech, education, engineering, vignan"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "description": "Sample extracted JD — this is what AutoApply AI returns after processing a job screenshot via POST /extract/from-image",
+  "job_id": 1,
+  "company_name": "Infosys",
+  "job_title": "SDET Engineer",
+  "core_responsibilities": [
+    "Design and implement automated test frameworks for web and API applications",
+    "Write and maintain test scripts using Selenium WebDriver and Java",
+    "Collaborate with development teams on CI/CD integration using Jenkins",
+    "Perform API testing using REST Assured and validate JSON/XML responses",
+    "Execute regression, smoke, and sanity test suites across sprint cycles",
+    "Participate in defect triage and root cause analysis"
+  ],
+  "required_skills": [
+    "Java",
+    "Selenium WebDriver",
+    "TestNG",
+    "REST Assured",
+    "Cucumber BDD",
+    "SQL",
+    "Git",
+    "Jenkins"
+  ],
+  "preferred_certifications": [
+    "ISTQB Foundation Level"
+  ],
+  "minimum_years_experience": 2,
+  "sample_match_score": {
+    "description": "Example match score for the sample profile above against this JD",
+    "sbert": 0.595,
+    "tfidf": 0.291,
+    "boolean": 0.875,
+    "total": 0.661,
+    "missing_skills": ["Jenkins"]
+  },
+  "sample_email_subject": "SDET Engineer Application — Selenium + Java Automation Specialist | Infosys",
+  "sample_email_word_count": 104
+}

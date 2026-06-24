@@ -1,0 +1,80 @@
+name: CI — AutoApply AI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend — Lint & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Syntax check — all Python files
+        run: |
+          cd backend
+          python -m py_compile config.py database.py main.py schemas.py
+          python -m py_compile routers/auth.py routers/email.py routers/extract.py
+          python -m py_compile routers/match.py routers/profile.py routers/resume.py
+          python -m py_compile services/email_writer.py services/gmail_sender.py
+          python -m py_compile services/ocr.py services/profile_parser.py
+          python -m py_compile services/scorer.py services/tailoring.py services/vector_store.py
+          echo "All Python files compile OK ✅"
+
+      - name: Run tests (no API key required)
+        run: |
+          cd backend
+          python -m pytest ../tests/test_matching.py ../tests/test_ocr.py ../tests/test_resume.py ../tests/test_email.py -v --tb=short
+        env:
+          GROQ_API_KEY: "test_key_ci"
+
+  frontend:
+    name: Frontend — Type Check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: TypeScript type check
+        run: |
+          cd frontend
+          npx tsc --noEmit
+          echo "TypeScript check passed ✅"
+
+      - name: Build check
+        run: |
+          cd frontend
+          npm run build
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:8000"
