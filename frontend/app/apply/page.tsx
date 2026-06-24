@@ -18,6 +18,8 @@ export default function ApplyPage() {
   const [matchResult, setMatchResult] = useState<any>(null);
   const [resumeResult, setResumeResult] = useState<any>(null);
   const [emailResult, setEmailResult] = useState<any>(null);
+  const [editedSubject, setEditedSubject] = useState("");
+  const [editedBody, setEditedBody] = useState("");
   const [sendResult, setSendResult] = useState<any>(null);
   const [gmailAuthorized, setGmailAuthorized] = useState<boolean | null>(null);
   const [recipientEmail, setRecipientEmail] = useState("");
@@ -62,16 +64,18 @@ export default function ApplyPage() {
     if (!recipientEmail) throw new Error("Please enter recipient email.");
     const result = await draftEmail(jobId!, recipientEmail);
     setEmailResult(result);
+    setEditedSubject(result.subject);
+    setEditedBody(result.body);
     // Also check Gmail status when reaching email step
     const gmailStatus = await getGmailStatus();
     setGmailAuthorized(gmailStatus.authorized);
     setStep(4);
   });
 
-  // Step 4 → Send Email
+  // Step 4 → Send Email (with any user edits applied)
   const handleSend = () => run(async () => {
     if (!emailResult?.draft_id) throw new Error("No draft to send.");
-    const result = await sendEmail(emailResult.draft_id);
+    const result = await sendEmail(emailResult.draft_id, editedSubject, editedBody);
     setSendResult(result);
   });
 
@@ -282,14 +286,25 @@ export default function ApplyPage() {
       {step === 4 && emailResult && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6">
           <button onClick={() => setStep(3)} className="text-sm text-slate-500 hover:text-slate-800 mb-4 flex items-center gap-1">← Back</button>
-          <h2 className="font-semibold text-slate-800 mb-4">Cold Email Draft ✅</h2>
-          <div className="bg-slate-50 rounded-xl p-4 mb-4">
-            <p className="text-xs text-slate-500 mb-1">Subject</p>
-            <p className="font-medium text-slate-800">{emailResult.subject}</p>
+          <h2 className="font-semibold text-slate-800 mb-1">Cold Email Draft ✅</h2>
+          <p className="text-xs text-slate-400 mb-4">Review and edit before sending — your changes will be saved automatically.</p>
+          <div className="mb-4">
+            <label className="block text-xs text-slate-500 mb-1">Subject</label>
+            <input
+              type="text"
+              value={editedSubject}
+              onChange={e => setEditedSubject(e.target.value)}
+              className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-400"
+            />
           </div>
-          <div className="bg-slate-50 rounded-xl p-4 mb-6">
-            <p className="text-xs text-slate-500 mb-2">Body</p>
-            <p className="text-sm text-slate-700 whitespace-pre-line">{emailResult.body}</p>
+          <div className="mb-6">
+            <label className="block text-xs text-slate-500 mb-1">Body</label>
+            <textarea
+              value={editedBody}
+              onChange={e => setEditedBody(e.target.value)}
+              rows={10}
+              className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-700 resize-none focus:outline-none focus:border-indigo-400"
+            />
           </div>
 
           {/* Gmail Authorization Status */}

@@ -8,8 +8,6 @@ pydantic
 
 # LLM
 groq
-langchain
-langchain-groq
 
 # OCR (local fallback)
 easyocr

@@ -68,8 +68,18 @@ export function resumeDownloadUrl(jobId: number) {
   return `${BASE}/generate-resume/download/${jobId}`;
 }
 
-export async function sendEmail(draftId: number) {
-  const res = await fetch(`${BASE}/email/send/${draftId}`, { method: "POST" });
+export async function getEmailDrafts() {
+  const res = await fetch(`${BASE}/email/drafts`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function sendEmail(draftId: number, subject?: string, body?: string) {
+  const res = await fetch(`${BASE}/email/send/${draftId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ subject: subject || null, body: body || null }),
+  });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

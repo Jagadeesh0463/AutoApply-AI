@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { resumeDownloadUrl } from "@/lib/api";
+import { resumeDownloadUrl, getEmailDrafts } from "@/lib/api";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -15,8 +15,7 @@ export default function ApplicationsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/email/drafts")
-      .then(r => r.json())
+    getEmailDrafts()
       .then(data => {
         setJobs(data.drafts || []);
         setLoading(false);

@@ -133,8 +133,13 @@ def get_draft(draft_id: int):
     return dict(row)
 
 
+class EmailEditRequest(BaseModel):
+    subject: str | None = None
+    body: str | None = None
+
+
 @router.post("/send/{draft_id}")
-def send_draft(draft_id: int):
+def send_draft(draft_id: int, edits: EmailEditRequest | None = None):
     """
     Send a saved email draft via Gmail with the tailored resume PDF attached.
     Requires Gmail to be authorized first via GET /auth/gmail.
@@ -157,6 +162,21 @@ def send_draft(draft_id: int):
         raise HTTPException(status_code=404, detail=f"Draft #{draft_id} not found.")
 
     draft = dict(draft)
+
+    # Apply any user edits (subject/body) before sending
+    if edits:
+        if edits.subject:
+            draft["subject"] = edits.subject
+        if edits.body:
+            draft["body"] = edits.body
+        if edits.subject or edits.body:
+            conn = get_connection()
+            conn.execute(
+                "UPDATE email_drafts SET subject=?, body=? WHERE id=?",
+                (draft["subject"], draft["body"], draft_id)
+            )
+            conn.commit()
+            conn.close()
 
     if draft["send_status"] == "sent":
         raise HTTPException(status_code=400, detail="This draft has already been sent.")

@@ -13,6 +13,9 @@ env/
 
 # Database & vector store — local data, not for git
 backend/data/autoapply.db
+backend/data/autoapply.db-wal
+backend/data/autoapply.db-shm
+backend/data/.fuse_hidden*
 backend/data/chroma/
 
 # Gmail OAuth tokens — NEVER commit (contains private credentials)
