@@ -13,7 +13,7 @@
 
 **Upload a job screenshot → get a tailored ATS resume + personalized cold email → sent via your Gmail**
 
-[Features](#-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Installation](#-installation) • [API Docs](#-api-endpoints) • [Capstone Report](CAPSTONE_REPORT.md)
+[Features](#-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Installation](#-installation) • [API Docs](#-api-endpoints) • [Roadmap](ROADMAP.md) • [Contributing](CONTRIBUTING.md) • [Capstone Report](CAPSTONE_REPORT.md)
 
 </div>
 
@@ -61,98 +61,19 @@ AutoApply AI is a full-stack AI application built as a capstone project for the 
 
 ## 🏗️ Architecture
 
-### High-Level Architecture
+Next.js frontend → FastAPI backend → Groq API (vision + text) → local ChromaDB + SQLite → Gmail API.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Next.js Frontend                          │
-│         TypeScript · Tailwind CSS · App Router               │
-│   5-step wizard: Upload → JD → Match → Resume → Email       │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ REST API (HTTP)
-┌──────────────────────▼──────────────────────────────────────┐
-│                   FastAPI Backend                            │
-│                                                             │
-│  /extract  ──►  /match  ──►  /generate-resume  ──►  /email │
-│                                                             │
-│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │  Groq API   │  │  ChromaDB    │  │     SQLite        │   │
-│  │ Vision+Text │  │ (local vec.) │  │   (WAL mode)      │   │
-│  └─────────────┘  └──────────────┘  └──────────────────┘   │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │    sentence-transformers (all-MiniLM-L6-v2)         │    │
-│  │              Runs 100% locally                      │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │         WeasyPrint + Jinja2 (local PDF)             │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                             │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │           Gmail API (OAuth 2.0 send)                │    │
-│  └─────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────┘
+Screenshot → Groq Vision (JD extraction) → SBERT+TF-IDF+Boolean scoring
+          → Groq LLM (resume tailor + email draft) → WeasyPrint PDF → Gmail send
 ```
 
-### Sequence Diagram
-
+**ATS Scoring:**
 ```
-User          Frontend       FastAPI        Groq API      ChromaDB      Gmail API
- │               │              │               │              │              │
- │─ upload img ──►              │               │              │              │
- │               │─ POST /extract/from-image ──►│              │              │
- │               │              │─── vision ───►│              │              │
- │               │              │◄── JD JSON ───│              │              │
- │               │◄── JD JSON ──│               │              │              │
- │─ confirm JD ──►              │               │              │              │
- │               │─ POST /match ►              │              │              │
- │               │              │──── query ───────────────────►              │
- │               │              │◄─── chunks ──────────────────│              │
- │               │◄─ score ─────│               │              │              │
- │─ gen resume ──►              │               │              │              │
- │               │─ POST /generate-resume ──────►              │              │
- │               │              │─── tailor ───►│              │              │
- │               │              │◄── resume ────│              │              │
- │               │◄── PDF ──────│               │              │              │
- │─ draft email ──►             │               │              │              │
- │               │─ POST /email/draft ──────────►              │              │
- │               │◄── subject+body ─────────────│              │              │
- │─ edit & send ──►             │               │              │              │
- │               │─ POST /email/send ───────────────────────────────────────►│
- │               │◄── gmail_id ────────────────────────────────────────────── │
+Match Score = (0.40 × Boolean skill presence) + (0.30 × SBERT) + (0.30 × TF-IDF)
 ```
 
-### Database ER Diagram
-
-```
-users
-  └── id, email, created_at
-
-profile_items  ──────── users.id
-  └── id, user_id, type, content, tags, created_at
-
-jobs  ───────────────── users.id
-  └── id, user_id, company_name, job_title,
-      extracted_skills_json, match_score, status, created_at
-
-tailored_resumes ─────── jobs.id
-  └── id, job_id, resume_html, pdf_path, match_score_breakdown
-
-email_drafts ──────────── jobs.id
-  └── id, job_id, recipient_email, subject, body,
-      send_status, sent_at
-```
-
-### ATS Scoring Formula
-
-```
-Match Score = (0.30 × SBERT semantic similarity)
-            + (0.30 × TF-IDF lexical similarity)
-            + (0.40 × Boolean required-skill presence)
-```
-
-Boolean is weighted highest (40%) — it's the most direct ATS signal.
+Full diagrams (sequence, ER, scoring rationale): [docs/architecture.md](docs/architecture.md)
 
 ---
 
@@ -237,7 +158,9 @@ AutoApply-AI/
 │       └── api.ts            # All API calls to FastAPI
 │
 ├── docs/
-│   └── api.md                # Full API endpoint documentation
+│   ├── api.md                # Full API endpoint documentation
+│   ├── architecture.md       # Sequence diagram, ER diagram, scoring rationale
+│   └── deployment.md         # Vercel + Render deployment guide
 │
 ├── tests/
 │   ├── test_ocr.py           # OCR extraction tests
@@ -250,10 +173,14 @@ AutoApply-AI/
 │   └── sample_jd.json        # Example extracted JD
 │
 ├── README.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── ROADMAP.md
 ├── CAPSTONE_REPORT.md        # Full academic write-up with real metrics
 ├── PLAN.md                   # Original project design document
 ├── CHANGELOG.md
 ├── LICENSE
+├── Makefile
 └── .env.example
 ```
 
@@ -405,6 +332,8 @@ Full metrics and analysis: [CAPSTONE_REPORT.md](CAPSTONE_REPORT.md)
 **Thallapalem Naga Bhagyasri**
 - 📧 bhagyat463@gmail.com
 - 🎓 FLM AI Mastery Program — Capstone Project (2026)
+
+> **Repository maintainer:** [S Jagadeesh](https://github.com/Jagadeesh0463) — the codebase was designed and built by Thallapalem Naga Bhagyasri as a personal capstone; this repository is hosted under a shared account.
 
 ---
 
