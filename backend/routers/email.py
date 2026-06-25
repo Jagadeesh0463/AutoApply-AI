@@ -200,7 +200,7 @@ def send_draft(draft_id: int, edits: EmailEditRequest | None = None):
 
     job_title = job_row["job_title"] if job_row else "Resume"
     company = job_row["company_name"] if job_row else ""
-    pdf_filename = f"Bhagyasri_Resume_{job_title.replace(' ', '_')}_{company.replace(' ', '_')}.pdf"
+    pdf_filename = f"Jagadeesh_Resume_{job_title.replace(' ', '_')}_{company.replace(' ', '_')}.pdf"
 
     print(f"[Email] Sending draft #{draft_id} to {draft['recipient_email']} "
           f"| PDF: {pdf_path}")

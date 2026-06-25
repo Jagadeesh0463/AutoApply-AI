@@ -54,7 +54,7 @@ All notable changes to AutoApply AI are documented here.
 - OAuth 2.0 Web application flow
 - PKCE disabled (`flow.code_verifier = None`) to fix "Missing code verifier" error
 - OAuth state persisted across HTTP requests in `.oauth_state.json` temp file
-- Resume PDF attached as `Bhagyasri_Resume_{Role}_{Company}.pdf`
+- Resume PDF attached as `Jagadeesh_Resume_{Role}_{Company}.pdf`
 - Daily cap: 10 sends/day (configurable via `DAILY_SEND_CAP`)
 
 #### Phase 8 — Real Testing

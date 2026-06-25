@@ -105,4 +105,4 @@ Open a GitHub issue using the bug report template. Include:
 
 ## Questions
 
-Open a GitHub Discussion or email bhagyat463@gmail.com.
+Open a GitHub Discussion or reach out via [github.com/Jagadeesh0463](https://github.com/Jagadeesh0463).

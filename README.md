@@ -329,11 +329,9 @@ Full metrics and analysis: [CAPSTONE_REPORT.md](CAPSTONE_REPORT.md)
 
 ## 👤 Author
 
-**Thallapalem Naga Bhagyasri**
-- 📧 bhagyat463@gmail.com
+**S Jagadeesh**
+- 🐙 [github.com/Jagadeesh0463](https://github.com/Jagadeesh0463)
 - 🎓 FLM AI Mastery Program — Capstone Project (2026)
-
-> **Repository maintainer:** [S Jagadeesh](https://github.com/Jagadeesh0463) — the codebase was designed and built by Thallapalem Naga Bhagyasri as a personal capstone; this repository is hosted under a shared account.
 
 ---
 

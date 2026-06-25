@@ -19,12 +19,12 @@ jinja_env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 # ─── Candidate header info (hardcoded for single-user MVP) ───────────────────
 # In a multi-user app this would come from the DB. For now, edit these values.
 CANDIDATE = {
-    "name": "Thallapalem Naga Bhagyasri",
-    "email": "bhagyat463@gmail.com",
-    "phone": "+91-9642765225",        # ← update with real number
+    "name": "S Jagadeesh",
+    "email": "",                       # ← add your email
+    "phone": "",                       # ← add your phone
     "location": "Bengaluru, India",
-    "linkedin": "linkedin.com/in/bhagyasri",   # ← update or leave blank
-    "github": "",
+    "linkedin": "",                    # ← add your LinkedIn URL or leave blank
+    "github": "github.com/Jagadeesh0463",
 }
 
 

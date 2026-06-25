@@ -6,7 +6,7 @@ export default function Dashboard() {
     <div>
       {/* Hero */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Welcome back, Bhagyasri 👋</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Welcome back, Jagadeesh 👋</h1>
         <p className="text-slate-500 mt-1">Your intelligent job application assistant</p>
       </div>
 

@@ -1,8 +1,8 @@
 # AutoApply AI — Capstone Project Report
 **FLM AI Mastery Program — Cohort Project Submission**
 
-**Author:** Thallapalem Naga Bhagyasri
-**Email:** bhagyat463@gmail.com
+**Author:** S Jagadeesh
+**GitHub:** github.com/Jagadeesh0463
 **Date:** June 2026
 **Repository:** autoapply-ai-intelligent-job-applier
 
@@ -187,7 +187,7 @@ Features: back navigation at every step, clickable completed steps, score color-
 - `/auth/gmail` initiates consent screen redirect
 - `/auth/gmail/callback` exchanges code for token, saves `token.json`
 - `token.json` auto-refreshes on expiry
-- Resume PDF attached as `Bhagyasri_Resume_{Role}_{Company}.pdf`
+- Resume PDF attached as `Jagadeesh_Resume_{Role}_{Company}.pdf`
 - Send status tracked in `email_drafts` table (`draft` → `sent` / `failed`)
 - Daily cap: 10 sends maximum per day (configurable)
 
