@@ -8,6 +8,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js&logoColor=white)](https://nextjs.org)
 [![Groq](https://img.shields.io/badge/Groq-Free_Tier-F55036?style=flat)](https://console.groq.com)
+[![CI](https://github.com/Jagadeesh0463/AutoApply-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Jagadeesh0463/AutoApply-AI/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Capstone](https://img.shields.io/badge/FLM-AI_Mastery_Capstone-blueviolet)](CAPSTONE_REPORT.md)
 
@@ -42,6 +43,26 @@ AutoApply AI is a full-stack AI application built as a capstone project for the 
 ```
 
 **Core design principle: "Emphasize, never fabricate."** Every word in the generated resume comes directly from your real uploaded profile — the AI only re-orders and re-phrases.
+
+---
+
+## ⚡ Quick Start
+
+```bash
+git clone https://github.com/Jagadeesh0463/AutoApply-AI.git
+cd AutoApply-AI
+
+# Backend
+cd backend && python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env          # add your GROQ_API_KEY
+uvicorn main:app --reload --port 8000
+
+# Frontend (new terminal)
+cd frontend && npm install && npm run dev
+```
+
+Open `http://localhost:3000` — full setup guide below.
 
 ---
 
@@ -101,15 +122,15 @@ Full diagrams (sequence, ER, scoring rationale): [docs/architecture.md](docs/arc
 
 ## 📸 Screenshots
 
-> **Note:** Start the app locally and take screenshots — see [Installation](#-installation) below.
+> Screenshots coming — run the app and drop images into `docs/screenshots/`.
 
-| Step | Screen |
-|------|--------|
-| 1. Upload | Upload a job screenshot or paste JD text |
-| 2. Review JD | Extracted title, company, skills, responsibilities |
-| 3. Match Score | Percentage breakdown: Semantic / Keywords / Skills |
-| 4. Resume | ATS-safe PDF download + ATS score |
-| 5. Email | Editable cold email draft → Send via Gmail |
+<!-- Uncomment when screenshots are added:
+![Upload](docs/screenshots/01_upload.png)
+![JD Review](docs/screenshots/02_jd_review.png)
+![ATS Score](docs/screenshots/03_match_score.png)
+![Resume](docs/screenshots/04_resume.png)
+![Email](docs/screenshots/05_email.png)
+-->
 
 ---
 
@@ -117,70 +138,13 @@ Full diagrams (sequence, ER, scoring rationale): [docs/architecture.md](docs/arc
 
 ```
 AutoApply-AI/
-│
-├── backend/
-│   ├── routers/
-│   │   ├── extract.py        # Screenshot/text → structured JD JSON
-│   │   ├── match.py          # Profile matching + hybrid ATS scoring
-│   │   ├── resume.py         # Resume generation + PDF rendering
-│   │   ├── email.py          # Email drafting + Gmail send
-│   │   ├── profile.py        # Resume upload + profile management
-│   │   └── auth.py           # Gmail OAuth 2.0 flow
-│   ├── services/
-│   │   ├── ocr.py            # Groq Vision + EasyOCR fallback
-│   │   ├── scorer.py         # Hybrid scoring (SBERT + TF-IDF + Boolean)
-│   │   ├── tailoring.py      # Groq LLM tailoring + WeasyPrint PDF
-│   │   ├── email_writer.py   # Cold email generation
-│   │   ├── vector_store.py   # ChromaDB + sentence-transformers
-│   │   ├── profile_parser.py # PDF/DOCX resume parsing
-│   │   └── gmail_sender.py   # Gmail API OAuth send
-│   ├── prompts/
-│   │   ├── extraction.txt    # JD extraction prompt
-│   │   ├── tailoring.txt     # Resume tailoring prompt
-│   │   └── email.txt         # Cold email prompt
-│   ├── templates/
-│   │   └── resume.html       # ATS-safe Jinja2 resume template
-│   ├── main.py               # FastAPI app + CORS + router registration
-│   ├── config.py             # All settings (weights, paths, models)
-│   ├── database.py           # SQLite WAL setup + schema init
-│   ├── schemas.py            # Pydantic models
-│   └── requirements.txt
-│
-├── frontend/
-│   ├── app/
-│   │   ├── page.tsx          # Dashboard
-│   │   ├── apply/page.tsx    # 5-step application wizard
-│   │   ├── applications/page.tsx  # Application history
-│   │   └── profile/page.tsx  # Profile management
-│   ├── components/
-│   │   └── Navbar.tsx
-│   └── lib/
-│       └── api.ts            # All API calls to FastAPI
-│
-├── docs/
-│   ├── api.md                # Full API endpoint documentation
-│   ├── architecture.md       # Sequence diagram, ER diagram, scoring rationale
-│   └── deployment.md         # Vercel + Render deployment guide
-│
-├── tests/
-│   ├── test_ocr.py           # OCR extraction tests
-│   ├── test_matching.py      # ATS scoring tests
-│   ├── test_resume.py        # Resume generation tests
-│   └── test_email.py         # Email draft tests
-│
-├── sample_data/
-│   ├── sample_profile.json   # Example profile structure
-│   └── sample_jd.json        # Example extracted JD
-│
-├── README.md
-├── CONTRIBUTING.md
-├── SECURITY.md
-├── ROADMAP.md
-├── CAPSTONE_REPORT.md        # Full academic write-up with real metrics
-├── PLAN.md                   # Original project design document
-├── CHANGELOG.md
-├── LICENSE
-├── Makefile
+├── backend/          # FastAPI — routers, services, prompts, templates
+├── frontend/         # Next.js — app router, components, API client
+├── docs/             # api.md · architecture.md · deployment.md
+├── tests/            # 38 pytest tests (scoring, OCR, resume, email)
+├── sample_data/      # sample_profile.json · sample_jd.json
+├── .github/          # CI workflow · issue templates · dependabot
+├── Makefile          # make install · test · lint · run-backend/frontend
 └── .env.example
 ```
 
@@ -257,22 +221,15 @@ Go to `http://localhost:3000/profile` and upload your resume PDF or DOCX. AutoAp
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/profile/upload-resume` | Upload PDF/DOCX resume → parse into profile items |
-| `GET` | `/profile` | List all stored profile items |
-| `DELETE` | `/profile/clear` | Clear all profile data |
+| `POST` | `/profile/upload-resume` | Upload resume PDF/DOCX → parse into profile |
 | `POST` | `/extract/from-image` | Screenshot → structured JD JSON |
-| `POST` | `/extract/from-text` | Pasted text → structured JD JSON |
-| `POST` | `/match` | Profile vs JD → hybrid match score + missing skills |
+| `POST` | `/match` | Profile vs JD → hybrid ATS score + missing skills |
 | `POST` | `/generate-resume` | Tailored resume → ATS-safe PDF |
-| `GET` | `/generate-resume/download/{job_id}` | Download generated PDF |
 | `POST` | `/email/draft` | Generate personalized cold email |
-| `POST` | `/email/send/{draft_id}` | Send email via Gmail with PDF attached |
-| `GET` | `/email/drafts` | List all email drafts |
+| `POST` | `/email/send/{draft_id}` | Send via Gmail with PDF attached |
 | `GET` | `/auth/gmail` | Start Gmail OAuth flow |
-| `GET` | `/auth/gmail/callback` | OAuth callback — saves token |
-| `GET` | `/auth/gmail/status` | Check Gmail authorization status |
 
-Full request/response examples: [docs/api.md](docs/api.md)
+Full endpoint reference with request/response examples: [docs/api.md](docs/api.md)
 
 ---
 
@@ -286,27 +243,13 @@ Full request/response examples: [docs/api.md](docs/api.md)
 
 ---
 
-## 🔮 Future Improvements
+## 🔮 Roadmap
 
-### Near-term
-1. **Multi-user support** — Replace `user_id=1` hardcode with JWT authentication
-2. **Resume version history** — Track and compare multiple versions per job
-3. **Follow-up scheduler** — Auto-draft follow-up email 7 days after send if no reply
-4. **Cover letter generation** — Full PDF cover letter alongside resume
+Near-term: resume version history, follow-up scheduler, cover letter generation.
 
-### AI / Agentic Enhancements
-5. **LangGraph Agentic Pipeline** — Replace the linear pipeline with a multi-agent graph:
-   - `JDParserAgent` — Extracts and validates job descriptions
-   - `ResumeTailoringAgent` — Iteratively improves resume until ATS score ≥ 85%
-   - `ATSValidationAgent` — Scores and flags gaps before PDF generation
-   - `EmailDraftAgent` — Generates and self-evaluates cold email quality
-6. **Iterative tailoring loop** — If ATS score < 80%, automatically run a second tailoring pass targeting specific missing skills
-7. **RAG over job boards** — Pull real job postings from public APIs instead of relying on screenshots
+Agentic (v2.0): LangGraph multi-agent pipeline — `JDParserAgent` → `ATSValidationAgent` → `ResumeTailoringAgent` → `EmailDraftAgent` with an iterative loop until ATS score ≥ 85%.
 
-### Infrastructure
-8. **CI/CD with GitHub Actions** — Automated lint, test, and build on every push
-9. **Public deployment** — Vercel (frontend) + Render (backend) for live demo
-10. **PostgreSQL + Redis** — Production-grade DB and task queue for multi-user scale
+Full roadmap: [ROADMAP.md](ROADMAP.md)
 
 ---
 
