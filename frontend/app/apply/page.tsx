@@ -40,6 +40,48 @@ function scoreExplanation(result: any): string {
   return "Low match — consider adding missing skills and tailoring your profile further.";
 }
 
+/* ── Hybrid email: AI opening paragraph + structured template ── */
+function buildProfessionalEmail(jd: any, matchResult: any, aiBody?: string): string {
+  const company = jd?.company_name || jd?.company || "your company";
+  const role    = jd?.job_title    || "the role";
+
+  // Top 4 matched skills only — prevents keyword stuffing
+  const topSkills: string[] = matchResult?.matched_skills?.slice(0, 4)
+    || ["Java", "Selenium", "TestNG", "REST Assured"];
+
+  // Use AI-generated first paragraph as the personalized opening if available,
+  // otherwise fall back to a solid professional default
+  const aiFirstPara = aiBody?.split(/\n\n+/)[0]?.trim() ?? "";
+  const cleanedAiOpening = aiFirstPara
+    .replace(/I['']d love to/gi,          "I would be glad to")
+    .replace(/I['']m excited to/gi,       "I was keen to")
+    .replace(/exciting opportunity/gi,    "opportunity")
+    .replace(/passion for/gi,             "focus on")
+    .replace(/aligns with my passion/gi,  "matches my experience");
+
+  const opening = cleanedAiOpening.length > 20
+    ? cleanedAiOpening
+    : `I came across the ${role} opportunity at ${company} and was keen to apply, as my experience closely matches your requirements.`;
+
+  const skillLines = topSkills.map(s => `• ${s}`).join("\n");
+
+  return `Dear Hiring Manager,
+
+${opening}
+
+Key skills matching your requirements:
+${skillLines}
+
+In recent projects, I developed an enterprise-grade hybrid automation framework covering UI, API, and database testing, and a scalable REST API automation suite supporting complete CRUD validation, response assertions, and reporting.
+
+I have attached my tailored resume for your review. I would be grateful for the opportunity to discuss how my experience can contribute to your ${role} team.
+
+Thank you for your time and consideration. I look forward to hearing from you.
+
+Best regards,
+Jagadeesh S`;
+}
+
 export default function ApplyPage() {
   const { toast } = useToast();
 
@@ -186,8 +228,14 @@ export default function ApplyPage() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) throw new Error("Please enter a valid email address.");
     const result = await draftEmail(jobId!, recipientEmail);
     setEmailResult(result);
-    setEditedSubject(result.subject);
-    setEditedBody(result.body);
+    // Use a professional subject format; fall back to AI-generated if JD not available
+    const professionalSubject = jd?.job_title
+      ? `Application for ${jd.job_title} – Jagadeesh S`
+      : result.subject;
+    setEditedSubject(professionalSubject);
+    // Hybrid email: AI opening paragraph for personalization + structured template for consistency
+    // Uses user-edited jd state — so corrected company name propagates correctly
+    setEditedBody(buildProfessionalEmail(jd, matchResult, result.body));
     const gmailStatus = await getGmailStatus();
     setGmailAuthorized(gmailStatus.authorized);
     setStep(4);
