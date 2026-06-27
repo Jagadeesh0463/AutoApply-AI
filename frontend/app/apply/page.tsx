@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Pencil, Check, X, Info } from "lucide-react";
 import {
@@ -49,7 +49,7 @@ export default function ApplyPage() {
   const [error,      setError]      = useState("");
 
   // Data state
-  const [file,           setFile]           = useState<File | null>(null);
+  const [files,          setFiles]          = useState<File[]>([]);
   const [pasteText,      setPasteText]      = useState("");
   const [useText,        setUseText]        = useState(false);
   const [jd,             setJd]             = useState<any>(null);
@@ -64,14 +64,58 @@ export default function ApplyPage() {
   const [gmailAuthorized, setGmailAuthorized] = useState<boolean | null>(null);
   const [recipientEmail, setRecipientEmail] = useState("");
 
-  // Drag-and-drop
+  // Multi-image drag-and-drop
   const [dragging, setDragging] = useState(false);
+  const [thumbnailUrls, setThumbnailUrls] = useState<string[]>([]);
+  const MAX_IMAGES = 5;
+
+  // Create/revoke object URLs for thumbnails on file change (avoids memory leak)
+  useEffect(() => {
+    const urls = files.map(f => URL.createObjectURL(f));
+    setThumbnailUrls(urls);
+    return () => urls.forEach(u => URL.revokeObjectURL(u));
+  }, [files]);
+
+  const addFiles = (incoming: FileList | File[]) => {
+    const imgs = Array.from(incoming).filter(f => f.type.startsWith("image/"));
+    if (imgs.length !== Array.from(incoming).length)
+      toast("Only image files are supported (PNG, JPG, WEBP)", "warning");
+    setFiles(prev => {
+      const combined = [...prev, ...imgs].slice(0, MAX_IMAGES);
+      if (prev.length + imgs.length > MAX_IMAGES)
+        toast(`Maximum ${MAX_IMAGES} screenshots allowed`, "warning");
+      return combined;
+    });
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    const dropped = e.dataTransfer.files?.[0];
-    if (dropped && dropped.type.startsWith("image/")) setFile(dropped);
-    else toast("Only image files are supported (PNG, JPG, WEBP)", "warning");
+    addFiles(e.dataTransfer.files);
+  };
+
+  const removeFile = (idx: number) =>
+    setFiles(prev => prev.filter((_, i) => i !== idx));
+
+  /* Stitch images vertically on a canvas → returns a single File */
+  const stitchImages = async (imgFiles: File[]): Promise<File> => {
+    if (imgFiles.length === 1) return imgFiles[0];
+    const bitmaps = await Promise.all(imgFiles.map(f => createImageBitmap(f)));
+    const width  = Math.max(...bitmaps.map(b => b.width));
+    const height = bitmaps.reduce((s, b) => s + b.height, 0);
+    const canvas = document.createElement("canvas");
+    canvas.width  = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d")!;
+    let y = 0;
+    for (const bm of bitmaps) {
+      ctx.drawImage(bm, 0, y);
+      y += bm.height;
+      bm.close();
+    }
+    return new Promise(resolve =>
+      canvas.toBlob(blob => resolve(new File([blob!], "stitched.jpg", { type: "image/jpeg" })), "image/jpeg", 0.92)
+    );
   };
 
   // JD inline editing
@@ -101,9 +145,13 @@ export default function ApplyPage() {
 
   // Step 0 → Extract JD
   const handleExtract = () => run("extract", async () => {
-    if (!useText && !file)          throw new Error("Please select a job screenshot.");
-    if (useText && !pasteText.trim()) throw new Error("Please paste a job description.");
-    const data = useText ? await extractFromText(pasteText) : await extractFromImage(file!);
+    if (!useText && files.length === 0) throw new Error("Please select at least one job screenshot.");
+    if (useText && !pasteText.trim())   throw new Error("Please paste a job description.");
+    let uploadFile: File | undefined;
+    if (!useText) {
+      uploadFile = await stitchImages(files);
+    }
+    const data = useText ? await extractFromText(pasteText) : await extractFromImage(uploadFile!);
     setJd(data);
     setJobId(data.job_id);
     setEditRole(data.job_title ?? "");
@@ -239,37 +287,68 @@ export default function ApplyPage() {
           </div>
 
           {!useText ? (
-            <label
-              className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                dragging ? "border-indigo-500 bg-indigo-50" : "border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/30"
-              }`}
-              onDragOver={e => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={handleDrop}
-            >
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="hidden"
-                onChange={e => setFile(e.target.files?.[0] || null)}
-                aria-label="Upload job screenshot"
-              />
-              {file ? (
-                <div>
-                  <p className="text-2xl mb-2">✅</p>
-                  <p className="text-indigo-600 font-medium">{file.name}</p>
-                  <p className="text-slate-400 text-xs mt-1">{(file.size / 1024).toFixed(0)} KB · Click to change</p>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-3xl mb-2">{dragging ? "📂" : "📸"}</p>
-                  <p className="text-slate-700 font-medium">
-                    {dragging ? "Drop your screenshot here" : "Drag & drop or click to upload"}
+            <div>
+              {/* Drop zone */}
+              <label
+                className={`block border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all mb-4 ${
+                  dragging ? "border-indigo-500 bg-indigo-50" : "border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/30"
+                }`}
+                onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  multiple
+                  className="hidden"
+                  onChange={e => e.target.files && addFiles(e.target.files)}
+                  aria-label="Upload job screenshots"
+                />
+                <p className="text-3xl mb-2">{dragging ? "📂" : "📸"}</p>
+                <p className="text-slate-700 font-medium">
+                  {dragging ? "Drop screenshots here" : "Drag & drop or click to upload"}
+                </p>
+                <p className="text-slate-400 text-sm mt-1">
+                  PNG, JPG, WEBP · Up to {MAX_IMAGES} screenshots · Max 10 MB each
+                </p>
+              </label>
+
+              {/* Thumbnail grid */}
+              {files.length > 0 && (
+                <div className="space-y-2 mb-2">
+                  <p className="text-xs font-medium text-slate-500">
+                    {files.length} screenshot{files.length > 1 ? "s" : ""} selected
+                    {files.length > 1 && <span className="ml-1 text-indigo-500">(will be stitched automatically)</span>}
                   </p>
-                  <p className="text-slate-400 text-sm mt-1">PNG, JPG, WEBP · Max 10 MB</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {files.map((f, i) => (
+                      <div key={i} className="relative group rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                        <img
+                          src={thumbnailUrls[i]}
+                          alt={`Screenshot ${i + 1}`}
+                          className="w-full h-24 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all" />
+                        <div className="absolute top-1 left-1 bg-indigo-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                          {i + 1}
+                        </div>
+                        <button
+                          onClick={() => removeFile(i)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                          aria-label={`Remove screenshot ${i + 1}`}
+                        >
+                          ✕
+                        </button>
+                        <p className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs px-1.5 py-0.5 truncate">
+                          {(f.size / 1024).toFixed(0)} KB
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </label>
+            </div>
           ) : (
             <textarea
               className="w-full border border-slate-300 rounded-xl p-4 text-sm text-slate-700 h-48 resize-none focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-300"
@@ -282,7 +361,7 @@ export default function ApplyPage() {
 
           <button
             onClick={handleExtract}
-            disabled={loading || (!useText && !file) || (useText && !pasteText.trim())}
+            disabled={loading || (!useText && files.length === 0) || (useText && !pasteText.trim())}
             className="mt-5 w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? <><span className="spinner" />Extracting JD...</> : "Extract Job Description →"}
@@ -466,19 +545,8 @@ export default function ApplyPage() {
             </div>
           )}
 
-          {/* Resume preview (iframe) */}
-          <div className="border border-slate-200 rounded-xl overflow-hidden mb-4">
-            <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-600">📄 Preview</span>
-              <span className="text-xs text-slate-400">{resumeFilename}</span>
-            </div>
-            <iframe
-              src={resumeDownloadUrl(resumeResult.job_id)}
-              title="Resume Preview"
-              className="w-full h-96"
-              style={{ background: "#f8fafc" }}
-            />
-          </div>
+          {/* Resume preview (blob URL to bypass attachment header) */}
+          <PdfPreview url={resumeDownloadUrl(resumeResult.job_id)} filename={resumeFilename} />
 
           {/* What AI changed */}
           <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-4">
@@ -651,7 +719,7 @@ export default function ApplyPage() {
                   onClick={() => {
                     setStep(0); setJd(null); setMatchResult(null);
                     setResumeResult(null); setEmailResult(null);
-                    setSendResult(null); setFile(null); setPasteText("");
+                    setSendResult(null); setFiles([]); setPasteText("");
                     setRecipientEmail(""); setPrevScore(null);
                   }}
                   className="flex-1 bg-indigo-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-indigo-700 transition-colors"
@@ -674,6 +742,60 @@ export default function ApplyPage() {
         onConfirm={handleSend}
         onCancel={() => setConfirmOpen(false)}
       />
+    </div>
+  );
+}
+
+/* ── PDF Preview (fetches as blob to bypass Content-Disposition: attachment) ── */
+function PdfPreview({ url, filename }: { url: string; filename: string }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string;
+    setPdfError(false);
+    setBlobUrl(null);
+
+    fetch(url)
+      .then(r => {
+        if (!r.ok) throw new Error("fetch failed");
+        return r.blob();
+      })
+      .then(blob => {
+        objectUrl = URL.createObjectURL(blob);
+        setBlobUrl(objectUrl);
+      })
+      .catch(() => setPdfError(true));
+
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [url]);
+
+  return (
+    <div className="border border-slate-200 rounded-xl overflow-hidden mb-4">
+      <div className="bg-slate-50 border-b border-slate-200 px-4 py-2 flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-600">📄 Preview</span>
+        <span className="text-xs text-slate-400">{filename}</span>
+      </div>
+      {pdfError ? (
+        <div className="h-32 flex items-center justify-center text-slate-400 text-sm bg-slate-50">
+          Preview unavailable — use the download button below.
+        </div>
+      ) : !blobUrl ? (
+        <div className="h-32 flex items-center justify-center bg-slate-50">
+          <span className="spinner" style={{ borderColor: "rgba(99,102,241,0.3)", borderTopColor: "#4f46e5" }} />
+        </div>
+      ) : (
+        <object
+          data={blobUrl}
+          type="application/pdf"
+          className="w-full h-96"
+          aria-label="Resume PDF preview"
+        >
+          <div className="h-32 flex items-center justify-center text-slate-400 text-sm bg-slate-50">
+            Your browser cannot display PDFs inline. Use the download button below.
+          </div>
+        </object>
+      )}
     </div>
   );
 }
