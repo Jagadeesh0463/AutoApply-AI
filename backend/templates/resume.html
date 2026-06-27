@@ -68,11 +68,13 @@
 <div class="header">
   <h1>{{ candidate.name }}</h1>
   <div class="contact">
-    <span>{{ candidate.email }}</span> |
-    <span>{{ candidate.phone }}</span> |
-    <span>{{ candidate.location }}</span>
-    {% if candidate.linkedin %} | <span>{{ candidate.linkedin }}</span>{% endif %}
-    {% if candidate.github %} | <span>{{ candidate.github }}</span>{% endif %}
+    {% set contact_parts = [] %}
+    {% if candidate.email %}{% set _ = contact_parts.append(candidate.email) %}{% endif %}
+    {% if candidate.phone %}{% set _ = contact_parts.append(candidate.phone) %}{% endif %}
+    {% if candidate.location %}{% set _ = contact_parts.append(candidate.location) %}{% endif %}
+    {% if candidate.linkedin %}{% set _ = contact_parts.append(candidate.linkedin) %}{% endif %}
+    {% if candidate.github %}{% set _ = contact_parts.append(candidate.github) %}{% endif %}
+    {{ contact_parts | join(' | ') }}
   </div>
 </div>
 

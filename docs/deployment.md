@@ -36,10 +36,7 @@ Vercel deploys Next.js apps for free with zero configuration.
 
 Your frontend will be live at `https://autoapply-ai.vercel.app` (or similar).
 
-> **Note:** Update `frontend/lib/api.ts` to use `process.env.NEXT_PUBLIC_API_URL` instead of the hardcoded `localhost:8000` for production:
-> ```typescript
-> const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-> ```
+> **Note:** `frontend/lib/api.ts` already reads `NEXT_PUBLIC_API_URL` at runtime — no code change needed for production.
 
 ---
 

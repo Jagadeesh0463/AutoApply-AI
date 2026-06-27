@@ -14,7 +14,7 @@
 
 **Upload a job screenshot → get a tailored ATS resume + personalized cold email → sent via your Gmail**
 
-[Features](#-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Installation](#-installation) • [API Docs](#-api-endpoints) • [Roadmap](ROADMAP.md) • [Contributing](CONTRIBUTING.md) • [Capstone Report](CAPSTONE_REPORT.md)
+[Features](#-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Installation](#-installation) • [API Docs](docs/api.md) • [Roadmap](ROADMAP.md) • [Contributing](CONTRIBUTING.md) • [Capstone Report](CAPSTONE_REPORT.md)
 
 </div>
 
@@ -52,14 +52,21 @@ AutoApply AI is a full-stack AI application built as a capstone project for the 
 git clone https://github.com/Jagadeesh0463/AutoApply-AI.git
 cd AutoApply-AI
 
-# Backend
-cd backend && python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env          # add your GROQ_API_KEY
-uvicorn main:app --reload --port 8000
+# macOS only — required by WeasyPrint for PDF generation
+brew install pango
 
-# Frontend (new terminal)
-cd frontend && npm install && npm run dev
+# Terminal 1 — Backend
+cd backend
+python -m venv venv && source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env    # add your GROQ_API_KEY
+uvicorn main:app --reload --port 8000
+```
+
+```bash
+# Terminal 2 — Frontend (open a new terminal from the repo root)
+cd AutoApply-AI/frontend
+npm install && npm run dev
 ```
 
 Open `http://localhost:3000` — full setup guide below.
@@ -91,7 +98,7 @@ Screenshot → Groq Vision (JD extraction) → SBERT+TF-IDF+Boolean scoring
 
 **ATS Scoring:**
 ```
-Match Score = (0.40 × Boolean skill presence) + (0.30 × SBERT) + (0.30 × TF-IDF)
+Match Score = (0.30 × SBERT) + (0.30 × TF-IDF) + (0.40 × Boolean skill presence)
 ```
 
 Full diagrams (sequence, ER, scoring rationale): [docs/architecture.md](docs/architecture.md)
@@ -253,20 +260,11 @@ Full roadmap: [ROADMAP.md](ROADMAP.md)
 
 ---
 
-## 📊 Results (Phase 8 Real Testing)
+## 📊 Results
 
-Tested against 5 realistic QA/SDET job postings:
+Tested against 5 real QA/SDET job postings: **100% pipeline success rate**, avg ATS score **71.5%**, avg email **107 words**, avg end-to-end time **18.1 seconds**.
 
-| Metric | Result |
-|--------|--------|
-| Pipeline success rate | **100%** (5/5 jobs) |
-| Avg skills extracted per job | **10.2** |
-| Avg ATS score | **71.5%** |
-| Best ATS score | **78.2%** (TCS QA Automation) |
-| Avg email word count | **107 words** (target: < 180) |
-| Avg pipeline time | **18.1 seconds** |
-
-Full metrics and analysis: [CAPSTONE_REPORT.md](CAPSTONE_REPORT.md)
+Full metrics, analysis, and per-job breakdown: [CAPSTONE_REPORT.md](CAPSTONE_REPORT.md)
 
 ---
 

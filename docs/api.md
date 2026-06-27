@@ -288,6 +288,26 @@ Content-Type: application/json
 
 ---
 
+### Get Single Draft
+```http
+GET /email/draft/{draft_id}
+```
+
+**Response**
+```json
+{
+  "id": 3,
+  "job_id": 7,
+  "recipient_email": "hiring@infosys.com",
+  "subject": "SDET Engineer Application",
+  "body": "Your automation testing initiatives at Infosys...",
+  "send_status": "pending",
+  "sent_at": null
+}
+```
+
+---
+
 ### List All Drafts
 ```http
 GET /email/drafts
